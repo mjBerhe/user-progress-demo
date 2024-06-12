@@ -7,16 +7,16 @@ import UsersProgression from "@/components/usersProgression";
 
 export default function Index() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col px-4">
       {/* header */}
-      <header className="w-full max-w-7xl mx-auto px-4 border-b border-gray-300 py-4">
+      <header className="w-full max-w-7xl mx-auto border-b border-gray-300 py-4">
         <Link to="/" className="font-medium">
           User Progress Demo
         </Link>
       </header>
 
       {/* main content */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 mt-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto mt-8">
         <div className="flex flex-col">
           <span className="text-gray-500 font-bold text-sm">Matthew Berhe</span>
           <h1 className="text-3xl font-bold">Dashboard</h1>
