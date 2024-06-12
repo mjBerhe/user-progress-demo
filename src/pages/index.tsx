@@ -1,6 +1,9 @@
-import { usersProgress } from "@/lib/data";
+import { Fragment } from "react";
+import clsx from "clsx";
 import { Link } from "@/router";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+
+import UsersProgression from "@/components/usersProgression";
 
 export default function Index() {
   return (
@@ -14,20 +17,56 @@ export default function Index() {
 
       {/* main content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 mt-8">
-        <div className="flex flex-col gap-y-1">
+        <div className="flex flex-col">
           <span className="text-gray-500 font-bold text-sm">Matthew Berhe</span>
           <h1 className="text-3xl font-bold">Dashboard</h1>
         </div>
 
         <TabGroup className="flex flex-col mt-10">
-          <TabList className="flex gap-x-4 text-sm font-bold text-gray-600">
-            <Tab>Members</Tab>
-            <Tab>Settings</Tab>
-            <Tab>More Settings</Tab>
+          <TabList className="flex gap-x-4 text-sm font-bold text-gray-600 border-b border-gray-300">
+            <Tab as={Fragment}>
+              {({ hover, selected }) => (
+                <button
+                  className={clsx(
+                    "border-b-[3px] border-transparent pb-3",
+                    hover && "text-gray-900",
+                    selected && "border-b-indigo-500 outline-none"
+                  )}
+                >
+                  Members
+                </button>
+              )}
+            </Tab>
+            <Tab as={Fragment}>
+              {({ hover, selected }) => (
+                <button
+                  className={clsx(
+                    "border-b-[3px] border-transparent pb-3",
+                    hover && "text-gray-900",
+                    selected && "border-b-indigo-500 outline-none"
+                  )}
+                >
+                  Settings
+                </button>
+              )}
+            </Tab>
+            <Tab as={Fragment}>
+              {({ hover, selected }) => (
+                <button
+                  className={clsx(
+                    "border-b-[3px] border-transparent pb-3",
+                    hover && "text-gray-900",
+                    selected && "border-b-indigo-500 outline-none"
+                  )}
+                >
+                  More Settings
+                </button>
+              )}
+            </Tab>
           </TabList>
-          <TabPanels>
+          <TabPanels className="mt-8">
             <TabPanel>
-              <div>Users</div>
+              <UsersProgression />
             </TabPanel>
             <TabPanel>
               <div>Settings here</div>
@@ -37,11 +76,6 @@ export default function Index() {
             </TabPanel>
           </TabPanels>
         </TabGroup>
-        {/* <div className="flex mt-10 gap-x-4 text-sm">
-          <div className="font-bold text-gray-600">Members</div>
-          <div className="font-bold text-gray-600">Settings</div>
-          <div className="font-bold text-gray-600">More Settings</div>
-        </div> */}
       </main>
 
       {/* footer */}
