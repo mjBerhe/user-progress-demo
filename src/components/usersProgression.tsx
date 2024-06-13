@@ -1,6 +1,16 @@
+import { useState, Fragment } from "react";
 import { ModuleProgress, UserProgress, usersProgress } from "@/lib/data";
 import clsx from "clsx";
 import { sum, round } from "lodash";
+import {
+  Description,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 const getPercent = (num: number, den: number) => {
   return round((num / den) * 100);
@@ -8,7 +18,7 @@ const getPercent = (num: number, den: number) => {
 
 const progressBarConvertion = (num: number, den: number) => {
   const val = (num / den) * 100;
-  if (val === 0) return "w-0";
+  if (val === 0) return "w-[1%]";
   if (val <= 5) return "w-[5%]";
   if (val <= 10) return "w-[10%]";
   if (val <= 15) return "w-[15%]";
@@ -31,6 +41,21 @@ const progressBarConvertion = (num: number, den: number) => {
   if (val === 100) return "w-full";
 };
 
+export type UserInfo = UserProgress & {
+  modules: {
+    subModulesCompleted: number;
+    totalQuestions: number;
+    totalAnswered: number;
+    name: string;
+    subModules: {
+      name: string;
+      totalQuestions: number;
+      totalAnswered: number;
+      complete: boolean;
+    }[];
+  }[];
+};
+
 export default function UsersProgression() {
   const getUnqiueModuleNames = (usersProgress: UserProgress[]) => {
     return [...new Set(usersProgress.map((x) => Object.keys(x.progress)).flat())];
@@ -43,7 +68,7 @@ export default function UsersProgression() {
     subModules: Object.keys(usersProgress[0].progress[moduleName]),
   }));
 
-  const userInfo = usersProgress.map((user) => ({
+  const userInfo: UserInfo[] = usersProgress.map((user) => ({
     ...user,
     modules: [
       ...moduleInfo.map((module) => ({
@@ -78,9 +103,19 @@ export default function UsersProgression() {
     }),
   }));
 
+  console.log(userInfo);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserInfo>();
+
+  const handleSelectUser = (user: UserInfo) => {
+    setSelectedUser(user);
+    setIsOpen(true);
+  };
+
   return (
     <div className="flex flex-col">
-      <h2 className="text-2xl font-bold">Users ({usersProgress.length})</h2>
+      <h2 className="text-2xl font-bold">Members ({usersProgress.length})</h2>
       <table className="border-separate border-spacing-y-0 table-auto mt-4">
         <thead className="text-center min-h-[100px]">
           <tr className="text-sm text-gray-600 font-semibold">
@@ -93,8 +128,17 @@ export default function UsersProgression() {
         <tbody className="text-center font-semibold">
           {userInfo.map((x) => (
             <tr key={x.user_id} className="text-sm odd:bg-indigo-100 even:bg-white">
-              <td className="">{x.name}</td>
-              <td className="">
+              {/*name coloumn*/}
+              <td>
+                <button
+                  onClick={() => handleSelectUser(x)}
+                  className="underline decoration-indigo-500"
+                >
+                  {x.name}
+                </button>
+              </td>
+              {/*modules completed coloumn*/}
+              <td>
                 <div className="flex flex-col items-center gap-y-1 my-3">
                   <div className="flex justify-center gap-x-4">
                     <span>
@@ -117,10 +161,10 @@ export default function UsersProgression() {
                       / {x.modules.length}
                     </span>
                   </div>
-                  <div className="w-full flex h-2 bg-slate-300 rounded-full overflow-hidden max-w-[250px]">
+                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
                     <div
                       className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap w-[25%]",
+                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
                         progressBarConvertion(
                           x.modules.filter(
                             (module) =>
@@ -133,8 +177,8 @@ export default function UsersProgression() {
                   </div>
                 </div>
               </td>
-
-              <td className="">
+              {/*submodules completed coloumn*/}
+              <td>
                 <div className="flex flex-col items-center gap-y-1 my-3">
                   <div className="flex justify-center gap-x-4">
                     <span>
@@ -149,10 +193,10 @@ export default function UsersProgression() {
                       {sum(x.modules.map((x) => x.subModules.length))}
                     </span>
                   </div>
-                  <div className="w-full flex h-2 bg-slate-300 rounded-full overflow-hidden max-w-[250px]">
+                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
                     <div
                       className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap w-[25%]",
+                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
                         progressBarConvertion(
                           sum(x.modules.map((x) => x.subModulesCompleted)),
                           sum(x.modules.map((x) => x.subModules.length))
@@ -162,8 +206,8 @@ export default function UsersProgression() {
                   </div>
                 </div>
               </td>
-
-              <td className="">
+              {/*questions completed coloumn*/}
+              <td>
                 <div className="flex flex-col items-center gap-y-1 my-3">
                   <div className="flex justify-center gap-x-4">
                     <span>
@@ -178,10 +222,10 @@ export default function UsersProgression() {
                       {sum(x.modules.map((x) => x.totalQuestions))}
                     </span>
                   </div>
-                  <div className="w-full flex h-2 bg-slate-300 rounded-full overflow-hidden max-w-[250px]">
+                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
                     <div
                       className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap w-[25%]",
+                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
                         progressBarConvertion(
                           sum(x.modules.map((x) => x.totalAnswered)),
                           sum(x.modules.map((x) => x.totalQuestions))
@@ -195,6 +239,110 @@ export default function UsersProgression() {
           ))}
         </tbody>
       </table>
+
+      <Transition appear show={isOpen}>
+        <Dialog
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          className="relative z-10 focus:outline-none"
+        >
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-black/40">
+            <div className="flex justify-center items-center min-h-full px-4 mt-[-96px]">
+              <TransitionChild
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 transform-[scale(95%)]"
+                enterTo="opacity-100 transform-[scale(100%)]"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 transform-[scale(100%)]"
+                leaveTo="opacity-0 transform-[scale(95%)]"
+              >
+                <DialogPanel className="w-full max-w-lg rounded-2xl bg-white px-8 py-6 backdrop-blur-2xl">
+                  <DialogTitle as="h3" className="text-xl font-bold">
+                    {selectedUser?.name}
+                  </DialogTitle>
+                  <TabGroup className="flex flex-col mt-2">
+                    <TabList className="flex gap-x-2 border-b pb-4">
+                      {selectedUser?.modules.map((x, i) => (
+                        <Tab as={Fragment} key={x.name}>
+                          {({ hover, selected }) => (
+                            <span
+                              className={clsx(
+                                selected && "bg-indigo-500 text-white",
+                                hover && "text-black bg-gray-200",
+                                "text-sm text-gray-600 font-semibold rounded-xl px-3 py-1 cursor-pointer"
+                              )}
+                            >
+                              Module {i + 1}
+                            </span>
+                          )}
+                        </Tab>
+                      ))}
+                    </TabList>
+                    <TabPanels className="mt-4">
+                      {selectedUser?.modules.map((x) => (
+                        <TabPanel key={x.name}>
+                          <div className="flex flex-col">
+                            <span className="text-lg font-bold">{x.name}</span>
+                            <TabGroup className="flex flex-col mt-2">
+                              <TabList className="flex gap-x-2 border-b pb-4">
+                                {x.subModules.map((y, i) => (
+                                  <Tab as={Fragment} key={y.name}>
+                                    {({ hover, selected }) => (
+                                      <span
+                                        className={clsx(
+                                          selected && "bg-indigo-500 text-white",
+                                          hover && "text-black bg-gray-200",
+                                          "text-sm text-gray-600 font-semibold rounded-xl px-3 py-1 cursor-pointer"
+                                        )}
+                                      >
+                                        SM {i + 1}
+                                      </span>
+                                    )}
+                                  </Tab>
+                                ))}
+                              </TabList>
+                              <TabPanels>
+                                {x.subModules.map((y) => (
+                                  <TabPanel key={y.name}>
+                                    <div className="flex flex-col mt-4">
+                                      <span className="text-lg font-bold">
+                                        {y.name} ({y.totalAnswered}/{y.totalQuestions})
+                                      </span>
+                                      <div className="flex flex-col gap-y-3 mt-2 text-gray-600">
+                                        {Object.keys(
+                                          selectedUser.progress[x.name][y.name]
+                                        ).map((question) => (
+                                          <div key={question} className="flex flex-col">
+                                            <span>{question}</span>
+                                            <span className="font-semibold text-black">
+                                              {selectedUser.progress[x.name][y.name][
+                                                question
+                                              ] ?? "N/A"}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </TabPanel>
+                                ))}
+                              </TabPanels>
+                            </TabGroup>
+                          </div>
+                        </TabPanel>
+                      ))}
+                    </TabPanels>
+                  </TabGroup>
+
+                  {/* <p className="mt-2 text-sm/6">
+                    Your payment has been successfully submitted. We’ve sent you an email
+                    with all of the details of your order.
+                  </p> */}
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

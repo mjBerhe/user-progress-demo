@@ -18,8 +18,8 @@ export default function Index() {
       {/* main content */}
       <main className="flex-1 w-full max-w-7xl mx-auto mt-8">
         <div className="flex flex-col">
-          <span className="text-gray-500 font-bold text-sm">Matthew Berhe</span>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <span className="text-gray-500 font-bold text-sm">Ben Honda</span>
+          <h1 className="text-3xl font-bold">Team Module Progress</h1>
         </div>
 
         <TabGroup className="flex flex-col mt-10">
