@@ -19,11 +19,11 @@ export default function Index() {
       <main className="flex-1 w-full max-w-7xl mx-auto mt-8">
         <div className="flex flex-col">
           <span className="text-gray-500 font-bold text-sm">Ben Honda</span>
-          <h1 className="text-3xl font-bold">Team Module Progress</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Team Module Progress</h1>
         </div>
 
         <TabGroup className="flex flex-col mt-10">
-          <TabList className="flex gap-x-4 text-sm font-bold text-gray-600 border-b border-gray-300">
+          <TabList className="flex gap-x-4 text-xs sm:text-sm font-bold text-gray-600 border-b border-gray-300">
             <Tab as={Fragment}>
               {({ hover, selected }) => (
                 <button
@@ -69,10 +69,10 @@ export default function Index() {
               <UsersProgression />
             </TabPanel>
             <TabPanel>
-              <div>Settings here</div>
+              <span className="text-xl sm:text-2xl font-bold">Settings</span>
             </TabPanel>
             <TabPanel>
-              <div>More Settings here</div>
+              <span className="text-xl sm:text-2xl font-bold">More Settings</span>
             </TabPanel>
           </TabPanels>
         </TabGroup>

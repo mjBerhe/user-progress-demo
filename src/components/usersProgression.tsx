@@ -1,16 +1,19 @@
 import { useState, Fragment } from "react";
-import { ModuleProgress, UserProgress, usersProgress } from "@/lib/data";
+import { UserProgress, usersProgress } from "@/lib/data";
 import clsx from "clsx";
 import { sum, round } from "lodash";
 import {
-  Description,
   Dialog,
   DialogPanel,
   DialogTitle,
   Transition,
   TransitionChild,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
 } from "@headlessui/react";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 const getPercent = (num: number, den: number) => {
   return round((num / den) * 100);
@@ -41,6 +44,10 @@ const progressBarConvertion = (num: number, den: number) => {
   if (val === 100) return "w-full";
 };
 
+const getUnqiueModuleNames = (usersProgress: UserProgress[]) => {
+  return [...new Set(usersProgress.map((x) => Object.keys(x.progress)).flat())];
+};
+
 export type UserInfo = UserProgress & {
   modules: {
     subModulesCompleted: number;
@@ -56,11 +63,10 @@ export type UserInfo = UserProgress & {
   }[];
 };
 
-export default function UsersProgression() {
-  const getUnqiueModuleNames = (usersProgress: UserProgress[]) => {
-    return [...new Set(usersProgress.map((x) => Object.keys(x.progress)).flat())];
-  };
+const barContainerClass =
+  "w-[90%] flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px] mx-2";
 
+export default function UsersProgression() {
   const uniqueModuleNames = getUnqiueModuleNames(usersProgress);
 
   const moduleInfo = uniqueModuleNames.map((moduleName) => ({
@@ -103,8 +109,6 @@ export default function UsersProgression() {
     }),
   }));
 
-  console.log(userInfo);
-
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserInfo>();
 
@@ -115,130 +119,135 @@ export default function UsersProgression() {
 
   return (
     <div className="flex flex-col">
-      <h2 className="text-2xl font-bold">Members ({usersProgress.length})</h2>
-      <table className="border-separate border-spacing-y-0 table-auto mt-4">
-        <thead className="text-center min-h-[100px]">
-          <tr className="text-sm text-gray-600 font-semibold">
-            <th className="py-2">Members</th>
-            <th>Modules Completed</th>
-            <th>Submodules Completed</th>
-            <th>Questions Completed</th>
-          </tr>
-        </thead>
-        <tbody className="text-center font-semibold">
-          {userInfo.map((x) => (
-            <tr key={x.user_id} className="text-sm odd:bg-indigo-100 even:bg-white">
-              {/*name coloumn*/}
-              <td>
-                <button
-                  onClick={() => handleSelectUser(x)}
-                  className="underline decoration-indigo-500"
-                >
-                  {x.name}
-                </button>
-              </td>
-              {/*modules completed coloumn*/}
-              <td>
-                <div className="flex flex-col items-center gap-y-1 my-3">
-                  <div className="flex justify-center gap-x-4">
-                    <span>
-                      {getPercent(
-                        x.modules.filter(
-                          (module) =>
-                            module.subModulesCompleted === module.subModules.length
-                        ).length,
-                        x.modules.length
-                      )}
-                      %
-                    </span>
-                    <span>
-                      {
-                        x.modules.filter(
-                          (module) =>
-                            module.subModulesCompleted === module.subModules.length
-                        ).length
-                      }{" "}
-                      / {x.modules.length}
-                    </span>
-                  </div>
-                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
-                    <div
-                      className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
-                        progressBarConvertion(
+      <h2 className="text-xl sm:text-2xl font-bold">Members ({usersProgress.length})</h2>
+      <div className="overflow-x-auto">
+        <table className="border-separate border-spacing-0 table-auto mt-4 overflow-scroll w-full min-w-[512px]">
+          <thead className="text-center min-h-[100px]">
+            <tr className="text-xs sm:text-sm text-gray-600 font-semibold">
+              <th className="py-2">Members</th>
+              <th>Modules Completed</th>
+              <th>Submodules Completed</th>
+              <th>Questions Completed</th>
+            </tr>
+          </thead>
+          <tbody className="text-center font-semibold">
+            {userInfo.map((x) => (
+              <tr
+                key={x.user_id}
+                className="text-xs sm:text-sm odd:bg-indigo-100 even:bg-white"
+              >
+                {/*name coloumn*/}
+                <td>
+                  <button
+                    onClick={() => handleSelectUser(x)}
+                    className="underline decoration-indigo-500"
+                  >
+                    {x.name}
+                  </button>
+                </td>
+                {/*modules completed coloumn*/}
+                <td>
+                  <div className="flex flex-col items-center gap-y-1 my-3">
+                    <div className="flex justify-center gap-x-2 sm:gap-x-4">
+                      <span>
+                        {getPercent(
                           x.modules.filter(
                             (module) =>
                               module.subModulesCompleted === module.subModules.length
                           ).length,
                           x.modules.length
-                        )
-                      )}
-                    ></div>
+                        )}
+                        %
+                      </span>
+                      <span>
+                        {
+                          x.modules.filter(
+                            (module) =>
+                              module.subModulesCompleted === module.subModules.length
+                          ).length
+                        }{" "}
+                        / {x.modules.length}
+                      </span>
+                    </div>
+                    <div className={barContainerClass}>
+                      <div
+                        className={clsx(
+                          "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
+                          progressBarConvertion(
+                            x.modules.filter(
+                              (module) =>
+                                module.subModulesCompleted === module.subModules.length
+                            ).length,
+                            x.modules.length
+                          )
+                        )}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              {/*submodules completed coloumn*/}
-              <td>
-                <div className="flex flex-col items-center gap-y-1 my-3">
-                  <div className="flex justify-center gap-x-4">
-                    <span>
-                      {getPercent(
-                        sum(x.modules.map((x) => x.subModulesCompleted)),
-                        sum(x.modules.map((x) => x.subModules.length))
-                      )}
-                      %
-                    </span>
-                    <span>
-                      {sum(x.modules.map((x) => x.subModulesCompleted))} /{" "}
-                      {sum(x.modules.map((x) => x.subModules.length))}
-                    </span>
-                  </div>
-                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
-                    <div
-                      className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
-                        progressBarConvertion(
+                </td>
+                {/*submodules completed coloumn*/}
+                <td>
+                  <div className="flex flex-col items-center gap-y-1 my-3">
+                    <div className="flex justify-center gap-x-2 sm:gap-x-4">
+                      <span>
+                        {getPercent(
                           sum(x.modules.map((x) => x.subModulesCompleted)),
                           sum(x.modules.map((x) => x.subModules.length))
-                        )
-                      )}
-                    ></div>
+                        )}
+                        %
+                      </span>
+                      <span>
+                        {sum(x.modules.map((x) => x.subModulesCompleted))} /{" "}
+                        {sum(x.modules.map((x) => x.subModules.length))}
+                      </span>
+                    </div>
+                    <div className={barContainerClass}>
+                      <div
+                        className={clsx(
+                          "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
+                          progressBarConvertion(
+                            sum(x.modules.map((x) => x.subModulesCompleted)),
+                            sum(x.modules.map((x) => x.subModules.length))
+                          )
+                        )}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              {/*questions completed coloumn*/}
-              <td>
-                <div className="flex flex-col items-center gap-y-1 my-3">
-                  <div className="flex justify-center gap-x-4">
-                    <span>
-                      {getPercent(
-                        sum(x.modules.map((x) => x.totalAnswered)),
-                        sum(x.modules.map((x) => x.totalQuestions))
-                      )}
-                      %
-                    </span>
-                    <span>
-                      {sum(x.modules.map((x) => x.totalAnswered))} /{" "}
-                      {sum(x.modules.map((x) => x.totalQuestions))}
-                    </span>
-                  </div>
-                  <div className="w-full flex h-2 bg-gray-400/50 rounded-full overflow-hidden max-w-[250px]">
-                    <div
-                      className={clsx(
-                        "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
-                        progressBarConvertion(
+                </td>
+                {/*questions completed coloumn*/}
+                <td>
+                  <div className="flex flex-col items-center gap-y-1 my-3">
+                    <div className="flex justify-center gap-x-2 sm:gap-x-4">
+                      <span>
+                        {getPercent(
                           sum(x.modules.map((x) => x.totalAnswered)),
                           sum(x.modules.map((x) => x.totalQuestions))
-                        )
-                      )}
-                    ></div>
+                        )}
+                        %
+                      </span>
+                      <span>
+                        {sum(x.modules.map((x) => x.totalAnswered))} /{" "}
+                        {sum(x.modules.map((x) => x.totalQuestions))}
+                      </span>
+                    </div>
+                    <div className={barContainerClass}>
+                      <div
+                        className={clsx(
+                          "flex rounded-full overflow-hidden bg-indigo-600 whitespace-nowrap",
+                          progressBarConvertion(
+                            sum(x.modules.map((x) => x.totalAnswered)),
+                            sum(x.modules.map((x) => x.totalQuestions))
+                          )
+                        )}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <Transition appear show={isOpen}>
         <Dialog
@@ -247,7 +256,7 @@ export default function UsersProgression() {
           className="relative z-10 focus:outline-none"
         >
           <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-black/40">
-            <div className="flex justify-center items-center min-h-full px-4 mt-[-96px]">
+            <div className="flex justify-center items-center min-h-full px-2 sm:px-4 sm:mt-[-96px]">
               <TransitionChild
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 transform-[scale(95%)]"
@@ -256,12 +265,12 @@ export default function UsersProgression() {
                 leaveFrom="opacity-100 transform-[scale(100%)]"
                 leaveTo="opacity-0 transform-[scale(95%)]"
               >
-                <DialogPanel className="w-full max-w-lg rounded-2xl bg-white px-8 py-6 backdrop-blur-2xl">
-                  <DialogTitle as="h3" className="text-xl font-bold">
+                <DialogPanel className="w-full max-w-lg rounded-2xl bg-white px-6 py-4 sm:px-8 sm:py-6 backdrop-blur-2xl">
+                  <DialogTitle as="h3" className="text-lg sm:text-xl font-bold">
                     {selectedUser?.name}
                   </DialogTitle>
-                  <TabGroup className="flex flex-col mt-2">
-                    <TabList className="flex gap-x-2 border-b pb-4">
+                  <TabGroup className="flex flex-col mt-1 sm:mt-2">
+                    <TabList className="flex gap-x-1 sm:gap-x-2 border-b pb-2 sm:pb-4">
                       {selectedUser?.modules.map((x, i) => (
                         <Tab as={Fragment} key={x.name}>
                           {({ hover, selected }) => (
@@ -278,13 +287,13 @@ export default function UsersProgression() {
                         </Tab>
                       ))}
                     </TabList>
-                    <TabPanels className="mt-4">
+                    <TabPanels className="mt-2 sm:mt-4">
                       {selectedUser?.modules.map((x) => (
                         <TabPanel key={x.name}>
                           <div className="flex flex-col">
-                            <span className="text-lg font-bold">{x.name}</span>
-                            <TabGroup className="flex flex-col mt-2">
-                              <TabList className="flex gap-x-2 border-b pb-4">
+                            <span className="sm:text-lg font-bold">{x.name}</span>
+                            <TabGroup className="flex flex-col mt-1 sm:mt-2">
+                              <TabList className="flex gap-x-1 sm:gap-x-2 border-b pb-2 sm:pb-4">
                                 {x.subModules.map((y, i) => (
                                   <Tab as={Fragment} key={y.name}>
                                     {({ hover, selected }) => (
@@ -304,11 +313,11 @@ export default function UsersProgression() {
                               <TabPanels>
                                 {x.subModules.map((y) => (
                                   <TabPanel key={y.name}>
-                                    <div className="flex flex-col mt-4">
-                                      <span className="text-lg font-bold">
+                                    <div className="flex flex-col mt-2 sm:mt-4">
+                                      <span className="sm:text-lg font-bold">
                                         {y.name} ({y.totalAnswered}/{y.totalQuestions})
                                       </span>
-                                      <div className="flex flex-col gap-y-3 mt-2 text-gray-600">
+                                      <div className="flex flex-col gap-y-3 mt-2 text-gray-600 text-sm sm:text-base">
                                         {Object.keys(
                                           selectedUser.progress[x.name][y.name]
                                         ).map((question) => (
@@ -332,11 +341,6 @@ export default function UsersProgression() {
                       ))}
                     </TabPanels>
                   </TabGroup>
-
-                  {/* <p className="mt-2 text-sm/6">
-                    Your payment has been successfully submitted. We’ve sent you an email
-                    with all of the details of your order.
-                  </p> */}
                 </DialogPanel>
               </TransitionChild>
             </div>
